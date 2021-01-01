@@ -113,5 +113,5 @@ export const parseIdentitySearchResult = (text) => {
 };
 
 export const test = async () => {
-  const parentage = getParantageByRegistrationNumber("208333DW1901911");
+  getParantageByRegistrationNumber("208333DW1901911");
 };
