@@ -2,7 +2,7 @@ import {
   getParantageByHid,
   parseIdentitySearchResult,
   parseParentageResult,
-  seachByIdentity,
+  searchByIdentity,
 } from "./index";
 import {
   parentageResponse,
@@ -80,7 +80,7 @@ test("parses parentenge result correctly", () => {
 });
 
 test("seachByIdentity resolves to correct parsed result", async () => {
-  const horse = await seachByIdentity("DW1901911");
+  const horse = await searchByIdentity("DW1901911");
   expect(horse).toEqual(parsedIdentitySearchResponse);
 });
 
