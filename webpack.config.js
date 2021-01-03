@@ -4,9 +4,9 @@ const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: ["whatwg-fetch", "./src/index.js"],
-  devtool: "inline-source-map",
+  // devtool: "inline-source-map",
   module: {
     rules: [
       {

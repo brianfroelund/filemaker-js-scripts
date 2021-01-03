@@ -1,5 +1,6 @@
-const horseDbUrl = "https://equinet.seges.dk/ords/prod/hdtxt.";
+import Fuse from "fuse.js";
 
+const horseDbUrl = "https://equinet.seges.dk/ords/prod/hdtxt.";
 export const searchByIdentity = (registrationNumber) => {
   return fetch(`${horseDbUrl}soeg_ident?sident=*${registrationNumber}*`)
     .then((response) => response.text())
@@ -7,15 +8,21 @@ export const searchByIdentity = (registrationNumber) => {
 };
 
 export const getParantageByHid = (hid) => {
-  return fetch(`${horseDbUrl}hest_afst?hid=*${hid}*`)
+  return fetch(`${horseDbUrl}hest_afst?hid=${hid}`)
     .then((response) => response.text())
     .then((text) => parseParentageResult(text));
 };
 
 export const getParantageByRegistrationNumber = (registrationNumber) => {
   return searchByIdentity(registrationNumber).then((results) => {
-    const horse = results.length > 1 ? null : results[0];
-    return getParantageByHid(horse.hid);
+    if (results.length === 1) {
+      return getParantageByHid(results[0].hid);
+    }
+    console.debug(
+      "Did not find exactly 1 match when searching by registration number. Results:",
+      results
+    );
+    return null;
   });
 };
 
@@ -34,7 +41,12 @@ export const parseParentageResult = (text) => {
       if (line.startsWith("PRIMÆR_IDENT:")) {
         resultHorse["registrationNumber"] = line.substring(13);
       } else if (line.startsWith("FØDSELSDATO:")) {
-        resultHorse["birthdate"] = line.substring(12);
+        // convert 26-05-2019 to 2019.05.26
+        resultHorse["birthdate"] = line
+          .substring(12)
+          .split("-")
+          .reverse()
+          .join(".");
       } else if (line.startsWith("KØN:")) {
         resultHorse["gender"] = line.substring(4);
       } else if (line.startsWith("FARVE:")) {
@@ -51,6 +63,8 @@ export const parseParentageResult = (text) => {
         resultHorse.additionalRegistrationNumbers.push(line.substring(12));
       } else if (line.startsWith("PRIMÆRE_KÅRINGER:")) {
         resultHorse["evaluation"] = line.substring(17);
+      } else if (line === "") {
+        // pass
       } else {
         console.debug(
           `Received unknown key for line "${line}" identity search result with`
@@ -98,6 +112,8 @@ export const parseIdentitySearchResult = (text) => {
     } else if (line.startsWith("AVLSFORBUND:")) {
       const value = line.substring(12);
       currentResult["breedingAssociation"] = value;
+    } else if (line === "") {
+      // pass
     } else if (line === "NOT MATCHED") {
       return [];
     } else {
@@ -112,6 +128,110 @@ export const parseIdentitySearchResult = (text) => {
   return results;
 };
 
-export const test = async () => {
-  getParantageByRegistrationNumber("208333DW1901911");
+export const insertHorseIntoFilemaker = (registrationNumber) => {
+  getParantageByRegistrationNumber(registrationNumber).then((parentage) => {
+    console.debug(JSON.stringify(parentage, null, 4));
+    if (!parentage) {
+      alert("Kunne ikke finde match i HesteDB");
+      return;
+    }
+    const { sire, dam } = parentage;
+    const sireExistingRegistration = findBestMatch(sire);
+    const damExistingRegistration = findBestMatch(dam);
+    const toMatchExistingRecords = {
+      ...parentage,
+      sire: {
+        ...sire,
+        registrationNumber: sireExistingRegistration
+          ? sireExistingRegistration
+          : sire.registrationNumber,
+      },
+      dam: {
+        ...dam,
+        registrationNumber: damExistingRegistration
+          ? damExistingRegistration
+          : dam.registrationNumber,
+      },
+    };
+    // eslint-disable-next-line no-undef
+    FileMaker.PerformScriptWithOption(
+      "IMPORT_FROM_HESTEDB",
+      JSON.stringify(toMatchExistingRecords),
+      "0"
+    );
+  });
 };
+
+let fuse = null;
+
+export const findBestMatch = (horse) => {
+  if (!fuse) {
+    console.debug("Fuse has not been initialized");
+    return null;
+  }
+  const { name, registrationNumber, additionalRegistrationNumbers } = horse;
+  const query = {
+    $or: [
+      {
+        $and: [{ name: `="${horse.name}"` }, { id: `"${registrationNumber}"` }],
+      },
+    ],
+  };
+  if (additionalRegistrationNumbers) {
+    additionalRegistrationNumbers.forEach((number) => {
+      query.$or.push({
+        $and: [{ name: `="${horse.name}"` }, { id: `"${number}"` }],
+      });
+    });
+  }
+  const result = fuse.search(query, {
+    limit: 3,
+  });
+  console.debug(`Searched for ${name} ${registrationNumber}, found:`, result);
+  if (result.length < 1) {
+    return null;
+  }
+  return result[0].item.id;
+};
+
+export const test = (data) => {
+  console.debug("test: parameter", JSON.parse(data));
+};
+
+export const populateExistingHorses = (data) => {
+  console.log("Starting population of existing horses");
+  let parsedData = data;
+
+  if (typeof data === "string") {
+    parsedData = JSON.parse(data);
+    parsedData = parsedData.response.data.map(({ fieldData }) => ({
+      id: fieldData["Patient Record"],
+      name: fieldData["Patient Name"],
+    }));
+    console.log(parsedData);
+  }
+  const options = {
+    includeScore: true,
+    keys: ["id", { name: "name", weight: 10 }],
+    threshold: 0.8,
+    useExtendedSearch: true,
+    minMatchCharLength: 2,
+  };
+  fuse = new Fuse(parsedData, options);
+  console.log("Finished populating existing horses");
+};
+
+window.filemaker = {
+  insertHorseIntoFilemaker,
+  populateExistingHorses,
+};
+
+console.log("Scripts loaded succesfully");
+// Filemaker is not available right away
+setTimeout(() => {
+  if (window.FileMaker) {
+    console.log("Requesting population of existing horse data");
+    // eslint-disable-next-line no-undef
+    FileMaker.PerformScriptWithOption("INDEX_WEBVIEW_SEARCH", "", "0");
+  }
+}, 2000);

@@ -102,7 +102,7 @@ PRIMÆR_IDENT:93.1288 KW NLD
 export const parsedParentageResponse = {
   name: "ALLEY CAT",
   registrationNumber: "208333DW1901911 DV DK",
-  birthdate: "26-05-2019",
+  birthdate: "2019.05.26",
   gender: "Hoppe",
   color: "brun",
   breeder: "Nina Bonnevie",

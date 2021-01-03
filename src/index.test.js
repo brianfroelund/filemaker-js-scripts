@@ -3,6 +3,8 @@ import {
   parseIdentitySearchResult,
   parseParentageResult,
   searchByIdentity,
+  findBestMatch,
+  populateExistingHorses,
 } from "./index";
 import {
   parentageResponse,
@@ -12,6 +14,7 @@ import {
   identitySearchResponse,
   parsedIdentitySearchResponse,
 } from "./mocks/identitySearchData";
+import { existingHorses } from "./mocks/existingHorses";
 
 test("parses multiple identity search results correctly", () => {
   expect(parseIdentitySearchResult(identitySearchResponse)).toEqual(
@@ -87,4 +90,55 @@ test("seachByIdentity resolves to correct parsed result", async () => {
 test("getParantageByHid resolves to correct parsed result", async () => {
   const horse = await getParantageByHid("14639252");
   expect(horse).toEqual(parsedParentageResponse);
+});
+
+test.only("finds valid match", () => {
+  populateExistingHorses(existingHorses);
+  expect(
+    findBestMatch({ registrationNumber: "OX+2238", name: "Meksiboy" })
+  ).toEqual("OX+2238");
+  expect(
+    findBestMatch({ registrationNumber: "208333DW2045389", name: "FIANO PIT" })
+  ).toEqual("dw2045389");
+  expect(
+    findBestMatch({ registrationNumber: "208333DW1901911", name: "ALLEY CAT" })
+  ).toEqual("dw1901911");
+  expect(
+    findBestMatch({
+      registrationNumber: "DVE 930 DV DK",
+      name: "SKOVENS RAFAEL",
+    })
+  ).toEqual("DVH 930");
+  expect(
+    findBestMatch({
+      registrationNumber: "752004041002407 SWB SWE",
+      name: "RAFAELS GINA",
+    })
+  ).toEqual("04102407");
+  expect(
+    findBestMatch({
+      registrationNumber: "DVE 818 DV DK",
+      name: "BLUE HORS ROMANOV",
+    })
+  ).toEqual("dvh 818");
+  expect(
+    findBestMatch({ registrationNumber: "0000694 DV DK", name: "TAZORBA" })
+  ).toEqual("0000694");
+  expect(
+    findBestMatch({ registrationNumber: "0000694 DV DK", name: "FIZORBA" })
+  ).toEqual(null);
+  expect(
+    findBestMatch({
+      additionalRegistrationNumbers: ["208333DW0801916 DV DK"],
+      name: "ERA DANCING HIT",
+      registrationNumber: "DVH 1077 DV DK",
+    })
+  ).toEqual("DW0801916");
+  expect(
+    findBestMatch({
+      additionalRegistrationNumbers: ["208333DW0801916 DV DK"],
+      name: "SØBAKKEHUS KAMILJA",
+      registrationNumber: "208333DW0505819 DV DK",
+    })
+  ).toEqual("dw0505819");
 });
