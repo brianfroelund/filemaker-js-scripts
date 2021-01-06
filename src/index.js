@@ -183,8 +183,7 @@ export const test = (data) => {
 };
 
 export const populateExistingHorses = (data) => {
-  // console.log("Starting population of existing horses");
-  alert('Starting population of existing horses');
+  console.log("Starting population of existing horses");
   let parsedData = data;
 
   if (typeof data === 'string') {
@@ -202,8 +201,7 @@ export const populateExistingHorses = (data) => {
     minMatchCharLength: 2,
   };
   fuse = new Fuse(parsedData, options);
-  // console.log("Finished populating existing horses");
-  alert('Finished populating existing horses');
+  console.log("Finished populating existing horses");
 };
 
 window.filemaker = {
