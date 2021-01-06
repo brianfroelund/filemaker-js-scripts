@@ -204,13 +204,14 @@ export const populateExistingHorses = (data) => {
   console.log("Finished populating existing horses");
 };
 
+// FileMaker on Windows can only global functions
 window['insertHorseIntoFilemaker'] = insertHorseIntoFilemaker;
 window['populateExistingHorses'] = populateExistingHorses;
 window['test'] = test;
 
 // Filemaker is not available right away
 setTimeout(() => {
-  console.log('Script version 0.0.1 loaded succesfully');
+  console.log('Script version 0.0.2 loaded succesfully');
   if (window.FileMaker) {
     console.log('Requesting population of existing horse data');
     try {
