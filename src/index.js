@@ -224,4 +224,4 @@ setTimeout(() => {
   } else {
     console.error('FileMaker not found')
   }
-}, 10000);
+}, 2000);
