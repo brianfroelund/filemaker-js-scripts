@@ -212,7 +212,7 @@ window.filemaker = {
 
 // Filemaker is not available right away
 setTimeout(() => {
-  console.log('Scripts loaded succesfully');
+  console.log('Script version 0.0.1 loaded succesfully');
   if (window.FileMaker) {
     console.log('Requesting population of existing horse data');
     try {
