@@ -29,9 +29,13 @@
     "webpack-cli": "^4.3.0"
   },
   "dependencies": {
-    "core-js": "^3.8.1",
+    "core-js": "^3.8.2",
     "fuse.js": "^6.4.5",
     "regenerator-runtime": "^0.13.7",
     "whatwg-fetch": "^3.5.0"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "IE 11"
+  ]
 }
