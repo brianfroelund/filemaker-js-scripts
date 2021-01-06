@@ -204,11 +204,9 @@ export const populateExistingHorses = (data) => {
   console.log("Finished populating existing horses");
 };
 
-window.filemaker = {
-  insertHorseIntoFilemaker,
-  populateExistingHorses,
-  test,
-};
+window['insertHorseIntoFilemaker'] = insertHorseIntoFilemaker;
+window['populateExistingHorses'] = populateExistingHorses;
+window['test'] = test;
 
 // Filemaker is not available right away
 setTimeout(() => {
