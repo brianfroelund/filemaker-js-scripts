@@ -155,7 +155,7 @@ export const populateExistingHorses = (data) => {
       name: fieldData['Patient Name'].trim(),
     }));
   } else {
-    parsedData = data.map(record => ({ ...record, name: record.name.trim()}))
+    parsedData = data.map((record) => ({ ...record, name: record.name.trim() }));
   }
   const options = {
     includeScore: true,
@@ -204,7 +204,7 @@ window['populateExistingHorses'] = populateExistingHorses;
 
 // Filemaker is not available right away
 setTimeout(() => {
-  console.log('Script version 0.0.2 loaded succesfully');
+  console.log('Script version 0.0.3 loaded succesfully');
   if (window.FileMaker) {
     console.log('Requesting population of existing horse data');
     try {
