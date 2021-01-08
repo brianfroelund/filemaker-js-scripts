@@ -75,7 +75,7 @@ test('getParantageByHid resolves to correct parsed result', async () => {
   expect(horse).toEqual(parsedParentageResponse);
 });
 
-test('finds valid match', () => {
+test.only('finds valid match', () => {
   populateExistingHorses(existingHorses);
   expect(findBestMatch({ registrationNumber: 'OX+2238', name: 'Meksiboy' })).toEqual('OX+2238');
   expect(findBestMatch({ registrationNumber: '208333DW2045389', name: 'FIANO PIT' })).toEqual('dw2045389');
@@ -121,9 +121,22 @@ test('finds valid match', () => {
       registrationNumber: 'DVH 1281 DV DK',
     })
   ).toEqual(null);
+  expect(
+    findBestMatch({
+      name: "LUNDERUP'S MENJA",
+      registrationNumber: '208333DW0402024 DV DK',
+    })
+  ).toEqual('dw0402024');
+  expect(
+    findBestMatch({
+      additionalRegistrationNumbers: ['106OF49 FE DEU'],
+      name: 'SECRET',
+      registrationNumber: 'DE473730609814 DS DEU',
+    })
+  ).toEqual('DE473730609814');
 });
 
-test.only('Inserts into filemaker', async () => {
+test('Inserts into filemaker', async () => {
   const performScriptWithOptionMock = jest.fn();
   window.FileMaker = { PerformScriptWithOption: performScriptWithOptionMock };
   const alertMock = jest.fn();

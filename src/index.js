@@ -119,17 +119,18 @@ export const findBestMatch = (horse) => {
     return null;
   }
   const { name, registrationNumber, additionalRegistrationNumbers } = horse;
+  const sanitizedName = name.replace("'", '');
   const query = {
     $or: [
       {
-        $and: [{ name: `="${horse.name}"` }, { id: `"${registrationNumber}"` }],
+        $and: [{ name: `="${sanitizedName}"` }, { id: `"${registrationNumber}"` }],
       },
     ],
   };
   if (additionalRegistrationNumbers) {
     additionalRegistrationNumbers.forEach((number) => {
       query.$or.push({
-        $and: [{ name: `="${horse.name}"` }, { id: `"${number}"` }],
+        $and: [{ name: `="${sanitizedName}"` }, { id: `"${number}"` }],
       });
     });
   }
@@ -151,8 +152,10 @@ export const populateExistingHorses = (data) => {
     parsedData = JSON.parse(data);
     parsedData = parsedData.response.data.map(({ fieldData }) => ({
       id: fieldData['Patient Record'],
-      name: fieldData['Patient Name'],
+      name: fieldData['Patient Name'].trim(),
     }));
+  } else {
+    parsedData = data.map(record => ({ ...record, name: record.name.trim()}))
   }
   const options = {
     includeScore: true,
