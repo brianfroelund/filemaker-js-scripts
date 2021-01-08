@@ -123,7 +123,7 @@ test.only('finds valid match', () => {
   ).toEqual(null);
   expect(
     findBestMatch({
-      name: "LUNDERUP'S MENJA",
+      name: `LUNDERUP'S ""MENJA`,
       registrationNumber: '208333DW0402024 DV DK',
     })
   ).toEqual('dw0402024');

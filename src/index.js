@@ -119,7 +119,8 @@ export const findBestMatch = (horse) => {
     return null;
   }
   const { name, registrationNumber, additionalRegistrationNumbers } = horse;
-  const sanitizedName = name.replace("'", '');
+  const sanitizedName = name.replace(/'|"/g, '');
+  console.debug(sanitizedName);
   const query = {
     $or: [
       {
