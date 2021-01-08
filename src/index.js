@@ -5,25 +5,16 @@ import Fuse from 'fuse.js';
 
 const horseDbUrl = 'https://equinet.seges.dk/ords/prod/hdtxt.';
 export const searchByIdentity = (registrationNumber) => {
-  return fetch(`${horseDbUrl}soeg_ident?sident=*${registrationNumber}*`)
+  const query = `*${registrationNumber.toUpperCase()}*`.slice(-15);
+  return fetch(`${horseDbUrl}soeg_ident?sident=${query}`)
     .then((response) => response.text())
     .then((text) => parseIdentitySearchResult(text));
 };
 
-export const getParantageByHid = (hid) => {
+export const getParentageByHid = (hid) => {
   return fetch(`${horseDbUrl}hest_afst?hid=${hid}`)
     .then((response) => response.text())
     .then((text) => parseParentageResult(text));
-};
-
-export const getParantageByRegistrationNumber = (registrationNumber) => {
-  return searchByIdentity(registrationNumber).then((results) => {
-    if (results.length === 1) {
-      return getParantageByHid(results[0].hid);
-    }
-    console.debug('Did not find exactly 1 match when searching by registration number. Results:', results);
-    return null;
-  });
 };
 
 export const parseParentageResult = (text) => {
@@ -120,32 +111,6 @@ export const parseIdentitySearchResult = (text) => {
   return results;
 };
 
-export const insertHorseIntoFilemaker = (registrationNumber) => {
-  getParantageByRegistrationNumber(registrationNumber).then((parentage) => {
-    console.debug(JSON.stringify(parentage, null, 4));
-    if (!parentage) {
-      alert('Kunne ikke finde match i HesteDB');
-      return;
-    }
-    const { sire, dam } = parentage;
-    const sireExistingRegistration = findBestMatch(sire);
-    const damExistingRegistration = findBestMatch(dam);
-    const toMatchExistingRecords = {
-      ...parentage,
-      sire: {
-        ...sire,
-        registrationNumber: sireExistingRegistration ? sireExistingRegistration : sire.registrationNumber,
-      },
-      dam: {
-        ...dam,
-        registrationNumber: damExistingRegistration ? damExistingRegistration : dam.registrationNumber,
-      },
-    };
-    // eslint-disable-next-line no-undef
-    FileMaker.PerformScriptWithOption('IMPORT_FROM_HESTEDB', JSON.stringify(toMatchExistingRecords), '0');
-  });
-};
-
 let fuse = null;
 
 export const findBestMatch = (horse) => {
@@ -178,12 +143,8 @@ export const findBestMatch = (horse) => {
   return result[0].item.id;
 };
 
-export const test = (data) => {
-  console.debug('test: parameter', JSON.parse(data));
-};
-
 export const populateExistingHorses = (data) => {
-  console.log("Starting population of existing horses");
+  console.log('Starting population of existing horses');
   let parsedData = data;
 
   if (typeof data === 'string') {
@@ -201,13 +162,42 @@ export const populateExistingHorses = (data) => {
     minMatchCharLength: 2,
   };
   fuse = new Fuse(parsedData, options);
-  console.log("Finished populating existing horses");
+  console.log('Finished populating existing horses');
 };
+
+export const insertHorseIntoFilemaker = (registrationNumber) =>
+  searchByIdentity(registrationNumber).then((results) => {
+    if (results.length != 1) {
+      console.debug('Did not find exactly 1 match when searching by registration number. Results:', results);
+      alert('Kunne ikke finde match i HesteDB');
+      return;
+    }
+
+    const { hid, breedingAssociation } = results[0];
+    getParentageByHid(hid, { breedingAssociation }).then((parentage) => {
+      const { sire, dam } = parentage;
+      const sireExistingRegistration = findBestMatch(sire);
+      const damExistingRegistration = findBestMatch(dam);
+      const toMatchExistingRecords = {
+        ...parentage,
+        breedingAssociation,
+        sire: {
+          ...sire,
+          registrationNumber: sireExistingRegistration ? sireExistingRegistration : sire.registrationNumber,
+        },
+        dam: {
+          ...dam,
+          registrationNumber: damExistingRegistration ? damExistingRegistration : dam.registrationNumber,
+        },
+      };
+      // eslint-disable-next-line no-undef
+      FileMaker.PerformScriptWithOption('IMPORT_FROM_HESTEDB', JSON.stringify(toMatchExistingRecords), '0');
+    });
+  });
 
 // FileMaker on Windows can only global functions
 window['insertHorseIntoFilemaker'] = insertHorseIntoFilemaker;
 window['populateExistingHorses'] = populateExistingHorses;
-window['test'] = test;
 
 // Filemaker is not available right away
 setTimeout(() => {
@@ -221,6 +211,6 @@ setTimeout(() => {
       console.log('error', error);
     }
   } else {
-    console.error('FileMaker not found')
+    console.error('FileMaker not found');
   }
 }, 2000);
