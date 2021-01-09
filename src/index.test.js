@@ -189,14 +189,14 @@ describe("findBestMatch", () => {
     ).toEqual("dw0505819");
   });
 
-  it("should find SYVHØJEGÅRDS UNFORGETABLE S DWB", () => {
+  it("should not find SYVHØJEGÅRDS UNFORGETABLE S DWB", () => {
     expect(
       findBestMatch({
         additionalRegistrationNumbers: ["208333DW1501118 DV DK"],
         name: "SYVHØJEGÅRDS UNFORGETABLE S DWB",
         registrationNumber: "DVH 1281 DV DK",
       })
-    ).toEqual("dw1501118");
+    ).toEqual("DVH 1281 DV DK");
   });
 
   it("should find D'AVIE", () => {
@@ -211,6 +211,20 @@ describe("findBestMatch", () => {
       })
     ).toEqual("dvh 1200");
   });
+
+  it("should not find PEPPERMILL", () => {
+    expect(
+      findBestMatch({
+        additionalRegistrationNumbers: [
+          "528003199704500 KW NLD",
+          "105SA75 FE DK",
+        ],
+        name: "PEPPERMILL",
+        registrationNumber: "97.04500 KW NLD",
+      })
+    ).toEqual("97.04500 KW NLD");
+  });
+
 
   it(`should handle names with qoutes`, () => {
     expect(
@@ -250,7 +264,7 @@ test("Inserts into filemaker correctly", async () => {
 
   await insertHorseIntoFilemaker("dw1901911");
   expect(performScriptMock.mock.calls.length).toBe(1);
-  let stringifiedReturnObject = `{"additionalRegistrationNumbers":[],"name":"ALLEY CAT","registrationNumber":"208333DW1901911 DV DK","birthdate":"2019.05.26","gender":"Hoppe","color":"brun","breeder":"Nina Bonnevie","sire":{"name":"KREMLIN MD","additionalRegistrationNumbers":["528003201501293 KW NLD"],"hid":"1393191","registrationNumber":"528003201301352","sire":{"additionalRegistrationNumbers":["DVH 1243 DV DK","105HH82 FE NLD"],"hid":"1226548","name":"GOVERNOR","registrationNumber":"528003201102359 KW NLD","sire":{"additionalRegistrationNumbers":["528003200006174 KW NLD","NED08021 FE NLD"],"hid":"872201","name":"TOTILAS","registrationNumber":"00.06174 KW NLD","sire":{"additionalRegistrationNumbers":["DVE 657 DV DK","93.14543 KW NLD","DVH 657 DV DK","NED06100 KW NLD"],"hid":"181199","name":"GRIBALDI","registrationNumber":"DE309090701693 TR DEU","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["528003199301288 KW NLD"],"hid":"872204","name":"LOMINKA","registrationNumber":"93.1288 KW NLD","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":["528003199607786 KW NLD"],"hid":"1241251","name":"ORLEANS","registrationNumber":"96.07786 KW NLD","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":[],"hid":"1393193","name":"FARESIA","registrationNumber":"528003201003191 KW NLD","sire":{"additionalRegistrationNumbers":["528003199807418 KW NLD","DE304048438098 BL DEU"],"hid":"556220","name":"ROUSSEAU","registrationNumber":"98.07418 KW NLD","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":[],"hid":"1393194","name":"BARESIA B","registrationNumber":"528003 06.00444 KW NLD","sire":null,"dam":null}}},"dam":{"name":"HOLMDALENS AISCHA","additionalRegistrationNumbers":[],"hid":"977552","registrationNumber":"dw1102921","evaluation":"DV EK 16-08-2015: RDS","sire":{"additionalRegistrationNumbers":["9901416 DV DK","208333199901416 DV DK","DE304040141699 BL DEU","DVH 801 DV DK"],"hid":"213419","name":"BLUE HORS DON ROMANTIC","registrationNumber":"DVE 801 DV DK","sire":{"additionalRegistrationNumbers":["DVH 690 DV DK","DE333332243993 OLD DEU","9308380 DR DK","DEN 02029 FE DK"],"hid":"194707","name":"BLUE HORS DON SCHUFRO","registrationNumber":"DVE 690 DV DK","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["DH 4901 DV DK","9503248 DV DK","208333199503248 DV DK"],"hid":"162340","name":"ROSITA","registrationNumber":"ERDH 4901 DV DK","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":[],"hid":"371140","name":"SASCHA","registrationNumber":"208333200301158 DV DK","sire":{"additionalRegistrationNumbers":["99.00610 KW NLD","528003199900610 KW NLD"],"hid":"326952","name":"SAM-SAM","registrationNumber":"DVH 794 DV DK","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["DH 3686 DV DK","9107060 DV DK","208333199107060 DV DK"],"hid":"88854","name":"DWIGHT-EAST","registrationNumber":"ERDH 3686 DV DK","sire":null,"dam":null}}},"breedingAssociation":"DV"}`;
+  let stringifiedReturnObject = `{"additionalRegistrationNumbers":[],"name":"ALLEY CAT","registrationNumber":"208333DW1901911 DV DK","birthdate":"2019.05.26","gender":"Hoppe","color":"brun","breeder":"Nina Bonnevie","sire":{"name":"KREMLIN MD","additionalRegistrationNumbers":["528003201501293 KW NLD"],"hid":"1393191","registrationNumber":"dvh 1300","sire":{"additionalRegistrationNumbers":["DVH 1243 DV DK","105HH82 FE NLD"],"hid":"1226548","name":"GOVERNOR","registrationNumber":"528003201102359 KW NLD","sire":{"additionalRegistrationNumbers":["528003200006174 KW NLD","NED08021 FE NLD"],"hid":"872201","name":"TOTILAS","registrationNumber":"00.06174 KW NLD","sire":{"additionalRegistrationNumbers":["DVE 657 DV DK","93.14543 KW NLD","DVH 657 DV DK","NED06100 KW NLD"],"hid":"181199","name":"GRIBALDI","registrationNumber":"DE309090701693 TR DEU","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["528003199301288 KW NLD"],"hid":"872204","name":"LOMINKA","registrationNumber":"93.1288 KW NLD","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":["528003199607786 KW NLD"],"hid":"1241251","name":"ORLEANS","registrationNumber":"96.07786 KW NLD","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":[],"hid":"1393193","name":"FARESIA","registrationNumber":"528003201003191 KW NLD","sire":{"additionalRegistrationNumbers":["528003199807418 KW NLD","DE304048438098 BL DEU"],"hid":"556220","name":"ROUSSEAU","registrationNumber":"98.07418 KW NLD","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":[],"hid":"1393194","name":"BARESIA B","registrationNumber":"528003 06.00444 KW NLD","sire":null,"dam":null}}},"dam":{"name":"HOLMDALENS AISCHA","additionalRegistrationNumbers":[],"hid":"977552","registrationNumber":"dw1102921","evaluation":"DV EK 16-08-2015: RDS","sire":{"additionalRegistrationNumbers":["9901416 DV DK","208333199901416 DV DK","DE304040141699 BL DEU","DVH 801 DV DK"],"hid":"213419","name":"BLUE HORS DON ROMANTIC","registrationNumber":"DVE 801 DV DK","sire":{"additionalRegistrationNumbers":["DVH 690 DV DK","DE333332243993 OLD DEU","9308380 DR DK","DEN 02029 FE DK"],"hid":"194707","name":"BLUE HORS DON SCHUFRO","registrationNumber":"DVE 690 DV DK","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["DH 4901 DV DK","9503248 DV DK","208333199503248 DV DK"],"hid":"162340","name":"ROSITA","registrationNumber":"ERDH 4901 DV DK","sire":null,"dam":null}},"dam":{"additionalRegistrationNumbers":[],"hid":"371140","name":"SASCHA","registrationNumber":"208333200301158 DV DK","sire":{"additionalRegistrationNumbers":["99.00610 KW NLD","528003199900610 KW NLD"],"hid":"326952","name":"SAM-SAM","registrationNumber":"DVH 794 DV DK","sire":null,"dam":null},"dam":{"additionalRegistrationNumbers":["DH 3686 DV DK","9107060 DV DK","208333199107060 DV DK"],"hid":"88854","name":"DWIGHT-EAST","registrationNumber":"ERDH 3686 DV DK","sire":null,"dam":null}}},"breedingAssociation":"DV"}`;
   expect(performScriptMock.mock.calls[0][0]).toBe("IMPORT_FROM_HESTEDB");
   expect(performScriptMock.mock.calls[0][1]).toBe(stringifiedReturnObject);
   expect(performScriptMock.mock.calls[0][2]).toBe("0");

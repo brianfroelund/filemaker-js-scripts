@@ -159,11 +159,11 @@ export const findBestMatch = (horse) => {
   if (additionalRegistrationNumbers) {
     additionalRegistrationNumbers.forEach((number) => {
       query.$or.push({
-        $and: [{ name: `"${sanitizedName}"` }, { id: `"${number}"` }],
+        $and: [{ name: `="${sanitizedName}"` }, { id: `"${number}"` }],
       });
     });
   }
-  const result = fuse.search(query, {
+  let result = fuse.search(query, {
     limit: 3,
   });
   console.debug(
@@ -251,7 +251,7 @@ window["populateExistingHorses"] = populateExistingHorses;
 
 // Filemaker is not available right away
 const initialize = () => {
-  console.log("Script version 0.0.6 loaded succesfully");
+  console.log("Script version 0.0.7 loaded succesfully");
   setTimeout(() => {
     if (window.FileMaker) {
       console.log("Requesting population of existing horse data");
