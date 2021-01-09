@@ -251,6 +251,6 @@ const initialize = () => {
   }, 1000);
 };
 
-if (!process.env.JEST_WORKER_ID) {
+if (!process?.env?.JEST_WORKER_ID) {
   initialize();
 }
