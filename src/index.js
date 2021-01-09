@@ -119,7 +119,7 @@ export const parseIdentitySearchResult = (text) => {
   return results;
 };
 
-export const sanitize = (name) => name.trim().replace(/"/g, "");
+export const sanitize = (name) => name.trim().replace(/’|´|'|"/g, "");
 
 let fuse = null;
 
@@ -140,7 +140,7 @@ export const findBestMatch = (horse) => {
       // },
       {
         $and: [
-          { name: `"${sanitizedName}"` },
+          { name: `="${sanitizedName}"` },
           { id: `"${registrationNumber}"` },
         ],
       },
@@ -156,9 +156,14 @@ export const findBestMatch = (horse) => {
   const result = fuse.search(query, {
     limit: 3,
   });
-  console.debug(`Searched for ${name} ${registrationNumber}, found:`, result);
+  console.debug(
+    `Searched for ${sanitizedName} ${registrationNumber}, found:`,
+    result
+  );
   if (result.length === 0) {
-    console.debug(`No matches found so returning original registration number ${registrationNumber}`);
+    console.debug(
+      `No matches found so returning original registration number ${registrationNumber}`
+    );
     return horse.registrationNumber;
   }
   return result[0].item.id;
@@ -172,19 +177,19 @@ export const populateExistingHorses = (data) => {
     parsedData = JSON.parse(data);
     parsedData = parsedData.response.data.map(({ fieldData }) => ({
       id: fieldData["Patient Record"],
-      name: fieldData["Patient Name"].trim().replace("´", "'"),
+      name: sanitize(fieldData["Patient Name"]),
     }));
   } else {
     parsedData = data.map((record) => ({
       ...record,
-      name: record.name.trim().replace("’", "'"),
+      name: sanitize(record.name),
     }));
   }
   const options = {
     includeScore: true,
     keys: ["id", { name: "name", weight: 2 }],
     threshold: 0.7,
-    // useExtendedSearch: true,
+    useExtendedSearch: true,
     minMatchCharLength: 3,
   };
   fuse = new Fuse(parsedData, options);
@@ -236,7 +241,7 @@ window["populateExistingHorses"] = populateExistingHorses;
 
 // Filemaker is not available right away
 const initialize = () => {
-  console.log("Script version 0.0.4 loaded succesfully");
+  console.log("Script version 0.0.5 loaded succesfully");
   setTimeout(() => {
     if (window.FileMaker) {
       console.log("Requesting population of existing horse data");
