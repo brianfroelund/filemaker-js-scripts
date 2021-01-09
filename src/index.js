@@ -5,7 +5,13 @@ import Fuse from "fuse.js";
 
 const horseDbUrl = "https://equinet.seges.dk/ords/prod/hdtxt.";
 export const searchByIdentity = (registrationNumber) => {
-  const query = `*${registrationNumber.toUpperCase()}*`.slice(-15);
+  const upperCaseRegNo = registrationNumber.toUpperCase();
+  let query = `*${upperCaseRegNo.substring(0, 13)}*`;
+  if (upperCaseRegNo.length === 15) {
+    query = upperCaseRegNo;
+  } else if (upperCaseRegNo.length === 14) {
+    query = `${upperCaseRegNo}*`;
+  }
   return fetch(`${horseDbUrl}soeg_ident?sident=${query}`)
     .then((response) => response.text())
     .then((text) => parseIdentitySearchResult(text));
@@ -119,7 +125,11 @@ export const parseIdentitySearchResult = (text) => {
   return results;
 };
 
-export const sanitize = (name) => name.trim().replace(/’|´|'|"/g, "");
+export const sanitize = (name) =>
+  name
+    .trim()
+    .replace(/’|´|'|"|/g, "")
+    .replace("-", " ");
 
 let fuse = null;
 
@@ -241,7 +251,7 @@ window["populateExistingHorses"] = populateExistingHorses;
 
 // Filemaker is not available right away
 const initialize = () => {
-  console.log("Script version 0.0.5 loaded succesfully");
+  console.log("Script version 0.0.6 loaded succesfully");
   setTimeout(() => {
     if (window.FileMaker) {
       console.log("Requesting population of existing horse data");

@@ -87,9 +87,23 @@ test("parses parentenge result correctly", () => {
   );
 });
 
-test("seachByIdentity resolves to correct parsed result", async () => {
-  const horse = await searchByIdentity("DW190191");
-  expect(horse).toEqual(parsedIdentitySearchResponse);
+describe("searchByIdentity", () => {
+  it("should resolves to correct parsed result", async () => {
+    const horse = await searchByIdentity("DW190191");
+    expect(horse).toEqual(parsedIdentitySearchResponse);
+  });
+
+  it("should keep query under 15 characters", async () => {
+    const horse = await searchByIdentity("528003201006446");
+    expect(horse).toEqual([
+      {
+        hid: "1360460",
+        name: "FOREVER-ESPECIAL",
+        registrationNumber: "528003201006446",
+        breedingAssociation: "KWPN",
+      },
+    ]);
+  });
 });
 
 test("getParantageByHid resolves to correct parsed result", async () => {
@@ -215,6 +229,16 @@ describe("findBestMatch", () => {
         registrationNumber: "DE473730609814 DS DEU",
       })
     ).toEqual("DE473730609814");
+  });
+
+  it("should find names with dashes", () => {
+    expect(
+      findBestMatch({
+        additionalRegistrationNumbers: ["9807910 DR DK"],
+        name: "DONNA-FEE",
+        registrationNumber: "DE331310021098 HN DEU",
+      })
+    ).toEqual("331310021098");
   });
 });
 
