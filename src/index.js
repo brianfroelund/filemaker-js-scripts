@@ -1,7 +1,7 @@
 import "core-js";
 import "regenerator-runtime/runtime";
-
-import Fuse from "fuse.js";
+// var FlexSearch = require("flexsearch");
+import "flexsearch";
 
 const horseDbUrl = "https://equinet.seges.dk/ords/prod/hdtxt.";
 export const searchByIdentity = (registrationNumber) => {
@@ -121,11 +121,11 @@ export const parseIdentitySearchResult = (text) => {
 
 export const sanitize = (name) => name.trim().replace(/"/g, "");
 
-let fuse = null;
+let index = null;
 
 export const findBestMatch = (horse) => {
-  if (!fuse) {
-    console.debug("Fuse has not been initialized");
+  if (!index) {
+    console.debug("Search index has not been initialized");
     return null;
   }
   const { name, registrationNumber, additionalRegistrationNumbers } = horse;
@@ -133,60 +133,43 @@ export const findBestMatch = (horse) => {
     return null;
   }
   const sanitizedName = sanitize(name);
-  const query = {
-    $or: [
-      // {
-      //   $and: [{ name: `="${sanitizedName}"` }, { id: `"${registrationNumber}"` }],
-      // },
-      {
-        $and: [
-          { name: `"${sanitizedName}"` },
-          { id: `"${registrationNumber}"` },
-        ],
-      },
-    ],
-  };
-  if (additionalRegistrationNumbers) {
-    additionalRegistrationNumbers.forEach((number) => {
-      query.$or.push({
-        $and: [{ name: `"${sanitizedName}"` }, { id: `"${number}"` }],
-      });
-    });
-  }
-  const result = fuse.search(query, {
-    limit: 3,
-  });
+  result = index.search(`${name} ${registrationNumber}`, 3);
+
+  // if (additionalRegistrationNumbers) {
+  //   additionalRegistrationNumbers.forEach((number) => {
+  //     query.$or.push({
+  //       $and: [{ name: `"${sanitizedName}"` }, { id: `"${number}"` }],
+  //     });
+  //   });
+  // }
   console.debug(`Searched for ${name} ${registrationNumber}, found:`, result);
-  if (result.length < 1) {
+  
+  if (result.length === 1) {
     return horse.registrationNumber;
   }
   return result[0].item.id;
 };
 
 export const populateExistingHorses = (data) => {
-  console.log("Starting population of existing horses");
+  console.log("Starting population of existing horses", FlexSearch);
   let parsedData = data;
-
+  index = FlexSearch("speed");
   if (typeof data === "string") {
     parsedData = JSON.parse(data);
     parsedData = parsedData.response.data.map(({ fieldData }) => ({
       id: fieldData["Patient Record"],
-      name: fieldData["Patient Name"].trim().replace("´", "'"),
+      name: fieldData["Patient Name"],
     }));
-  } else {
-    parsedData = data.map((record) => ({
-      ...record,
-      name: record.name.trim().replace("’", "'"),
-    }));
-  }
-  const options = {
-    includeScore: true,
-    keys: ["id", { name: "name", weight: 2 }],
-    threshold: 0.7,
-    // useExtendedSearch: true,
-    minMatchCharLength: 3,
-  };
-  fuse = new Fuse(parsedData, options);
+  } 
+  parsedData.forEach(({id, name}) => {index.add(id, `${name} ${id}`)});
+  console.log("Added all records to index");
+  // const options = {
+  //   includeScore: true,
+  //   keys: ["id", { name: "name", weight: 2 }],
+  //   threshold: 0.7,
+  //   // useExtendedSearch: true,
+  //   minMatchCharLength: 3,
+  // };
   console.log("Finished populating existing horses");
 };
 

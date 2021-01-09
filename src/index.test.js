@@ -98,7 +98,7 @@ test("getParantageByHid resolves to correct parsed result", async () => {
 });
 
 describe("findBestMatch", () => {
-  it("should find Meksiboy", () => {
+  it.only("should find Meksiboy", () => {
     expect(
       findBestMatch({ registrationNumber: "OX+2238", name: "Meksiboy" })
     ).toEqual("OX+2238");
