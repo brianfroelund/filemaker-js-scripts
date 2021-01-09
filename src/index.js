@@ -157,7 +157,8 @@ export const findBestMatch = (horse) => {
     limit: 3,
   });
   console.debug(`Searched for ${name} ${registrationNumber}, found:`, result);
-  if (result.length < 1) {
+  if (result.length === 0) {
+    console.debug(`No matches found so returning original registration number ${registrationNumber}`);
     return horse.registrationNumber;
   }
   return result[0].item.id;
@@ -209,15 +210,15 @@ export const insertHorseIntoFilemaker = (registrationNumber) =>
         breedingAssociation,
         sire: {
           name: "",
+          ...sire,
           registrationNumber: sire?.registrationNumber
             ? findBestMatch(sire)
             : "",
-          ...sire,
         },
         dam: {
           name: "",
-          registrationNumber: dam?.registrationNumber ? findBestMatch(dam) : "",
           ...dam,
+          registrationNumber: dam?.registrationNumber ? findBestMatch(dam) : "",
         },
       };
       // eslint-disable-next-line no-undef
