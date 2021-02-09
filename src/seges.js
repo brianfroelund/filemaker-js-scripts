@@ -58,7 +58,7 @@ export const getParentageByChip = async (chip) => {
     const rawParsedData = {};
     tb.forEach((row) => {
       const key = row.firstChild.innerText;
-      const value = row.lastChild.innerText;
+      const value = row.lastChild.innerHTML;
       if (key) {
         rawParsedData[key] = value;
       }
@@ -77,10 +77,16 @@ export const parseHorse = (rawParsedData) => {
     if (!parent) {
       return { name: "", registrationNumber: ""};
     }
-    return {
-      name: parent.match(/(?<=Navn: )(.*?)(?=Født: )/)[0],
-      registrationNumber: parent.match(/(?<=Ident: )(.*?)(?=Navn: )/)[0],
-    };
+    const ps = parent.split("<br>");
+    return ps.reduce((map, line) => {
+      if (line.startsWith("<strong>Ident:</strong> ")) {
+        return { ...map, registrationNumber: line.substring(24) };
+      } else if (line.startsWith("<strong>Navn:</strong> ")) {
+        return { ...map, name: line.substring(23) };
+      } else {
+        return map;
+      }
+    }, { name: "", registrationNumber: ""});
   };
 
   let additionalRegistrationNumbers = []
