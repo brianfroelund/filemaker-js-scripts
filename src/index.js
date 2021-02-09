@@ -4,12 +4,12 @@ import "regenerator-runtime/runtime";
 import { getParentageByChip } from "./seges";
 
 export const getHorse = (chip) => {
-  getParentageByChip(chip).then((parentage) => {
-    console.info("horse", parentage);
+  getParentageByChip(chip).then((horse) => {
+    console.info("horse", horse);
     // eslint-disable-next-line no-undef
     FileMaker.PerformScriptWithOption(
       "insertNewHorseJson",
-      JSON.stringify(horseToInsert),
+      JSON.stringify(horse),
       "0"
     );
   });
