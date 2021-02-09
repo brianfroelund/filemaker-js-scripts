@@ -40,7 +40,6 @@ export const getParentageByChip = async (chip) => {
     );
     const html = await response.text();
     const searchDocument = new DOMParser().parseFromString(html, "text/html");
-    var paragraphs = searchDocument.querySelectorAll("p");
     const horseAnchor = searchDocument.querySelector(
       "#R48712627851389757 > tbody > tr:nth-child(2) > td:nth-child(2) > table.t7standard > tbody > tr:nth-child(2) > td:nth-child(1) > a"
     );
@@ -78,23 +77,16 @@ export const parseHorse = (rawParsedData) => {
     if (!parent) {
       return { name: "", registrationNumber: ""};
     }
-    const ps = parent.split("\n");
-    return ps.reduce((map, line) => {
-      if (line.startsWith("Ident:")) {
-        return { ...map, registrationNumber: line.substring(7) };
-      } else if (line.startsWith("Navn:")) {
-        return { ...map, name: line.substring(6) };
-      } else {
-        return map;
-      }
-    }, { name: "", registrationNumber: ""});
+    return {
+      name: parent.match(/(?<=Navn: )(.*?)(?=Født: )/)[0],
+      registrationNumber: parent.match(/(?<=Ident: )(.*?)(?=Navn: )/)[0],
+    };
   };
 
   let additionalRegistrationNumbers = []
   if ("Øvrige identiteter" in rawParsedData) {
     additionalRegistrationNumbers = rawParsedData["Øvrige identiteter"].split("\n");
   }
-
   const result = {
     breeder: "",
     name: rawParsedData.Navn,

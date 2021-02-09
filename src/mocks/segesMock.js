@@ -110,23 +110,3 @@ export const rawParsedToParsed = [
     },
   },
 ];
-
-
-const hej= '{
-    name: "ALLEY CAT",
-    registrationNumber: "208333DW1901911",
-    birthdate: "2019.05.26",
-    breedingAssociation: "DV",
-    gender: "hoppe",
-    color: "brun",
-    breeder: "Nina Bonnevie",
-    additionalRegistrationNumbers: [],
-    sire: {
-      name: "KREMLIN MD",
-      registrationNumber: "DVH 1300",
-    },
-    dam: {
-      name: "HOLMDALENS AISCHA",
-      registrationNumber: "208333DW1102921",
-    },
-  }'
