@@ -3,8 +3,8 @@ import "regenerator-runtime/runtime";
 
 import { getParentageByChip } from "./seges";
 
-export const getHorse = (chip) => {
-  getParentageByChip(chip).then((horse) => {
+export const getHorse = (chip, registrationNumber) => {
+  getParentageByChip(chip, registrationNumber).then((horse) => {
     console.info("horse", horse);
     // eslint-disable-next-line no-undef
     FileMaker.PerformScriptWithOption(

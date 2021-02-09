@@ -1,7 +1,11 @@
 import "core-js";
 import "regenerator-runtime/runtime";
 
-export const getParentageByChip = async (chip) => {
+export const getParentageByChip = async (chip, registrationNumber) => {
+  if(!chip && !registrationNumber) {
+    console.info("No chip or registration number provided")
+    return;
+  }
   const body = new URLSearchParams();
   body.append("p_flow_id", "1000");
   body.append("p_flow_step_id", "2");
@@ -17,13 +21,13 @@ export const getParentageByChip = async (chip) => {
   body.append("p_arg_names", "5504418223409928");
   body.append("p_t05", "Søg hest");
   body.append("p_arg_names", "2435815727412919");
-  body.append("p_t06", "^$");
+  body.append("p_t06", chip ? "^$" : `^.*${registrationNumber}.*$`);
   body.append("p_arg_names", "2454408545080138");
-  body.append("p_t07", "^( .*)?$");
+  body.append("p_t07", chip ? "^( .*)?$" : `^.*${registrationNumber}.*( .*)?$`);
   body.append("p_arg_names", "1498921620370179");
-  body.append("p_v08", "chip");
+  body.append("p_v08", chip ? "chip": "ident");
   body.append("p_arg_names", "1501600458411400");
-  body.append("p_t09", chip);
+  body.append("p_t09", chip ? chip : registrationNumber);
   body.append("p_arg_names", "2733003807699059");
   body.append("p_t10", "FIND_HEST_SOEGEKRITERIER");
   const requestOptions = {
@@ -41,7 +45,7 @@ export const getParentageByChip = async (chip) => {
     const html = await response.text();
     const searchDocument = new DOMParser().parseFromString(html, "text/html");
     const horseAnchor = searchDocument.querySelector(
-      "#R48712627851389757 > tbody > tr:nth-child(2) > td:nth-child(2) > table.t7standard > tbody > tr:nth-child(2) > td:nth-child(1) > a"
+      "table.t7GCCReportsStyle2 > tbody > tr:nth-child(2) > td:nth-child(2) > table.t7standard > tbody > tr:nth-child(2) > td:nth-child(1) > a"
     );
     const horseHtml = await (
       await fetch(
