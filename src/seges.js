@@ -47,6 +47,9 @@ export const getParentageByChip = async (chip, registrationNumber) => {
     const horseAnchor = searchDocument.querySelector(
       "table.t7GCCReportsStyle2 > tbody > tr:nth-child(2) > td:nth-child(2) > table.t7standard > tbody > tr:nth-child(2) > td:nth-child(1) > a"
     );
+    if (!horseAnchor) {
+      return null;
+    }
     const horseHtml = await (
       await fetch(
         "https://equinet.seges.dk/ords/prod/" + horseAnchor.getAttribute("href")
@@ -70,6 +73,7 @@ export const getParentageByChip = async (chip, registrationNumber) => {
     return parseHorse(rawParsedData);
   } catch (error) {
     console.error(error);
+    return null;
   }
 };
 

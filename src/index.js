@@ -5,13 +5,17 @@ import { getParentageByChip } from "./seges";
 
 export const getHorse = (chip, registrationNumber) => {
   getParentageByChip(chip, registrationNumber).then((horse) => {
-    console.info("horse", horse);
-    // eslint-disable-next-line no-undef
-    FileMaker.PerformScriptWithOption(
-      "insertNewHorseJson",
-      JSON.stringify(horse),
-      "0"
-    );
+    if (horse) {
+      console.info("horse", horse);
+      // eslint-disable-next-line no-undef
+      FileMaker.PerformScriptWithOption(
+        "insertNewHorseJson",
+        JSON.stringify(horse),
+        "0"
+      );
+    } else {
+      alert("Kunne ikke finde et match")
+    }
   });
 };
 
