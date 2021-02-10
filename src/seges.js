@@ -2,8 +2,8 @@ import "core-js";
 import "regenerator-runtime/runtime";
 
 export const getParentageByChip = async (chip, registrationNumber) => {
-  if(!chip && !registrationNumber) {
-    console.info("No chip or registration number provided")
+  if (!chip && !registrationNumber) {
+    console.info("No chip or registration number provided");
     return;
   }
   const body = new URLSearchParams();
@@ -25,7 +25,7 @@ export const getParentageByChip = async (chip, registrationNumber) => {
   body.append("p_arg_names", "2454408545080138");
   body.append("p_t07", chip ? "^( .*)?$" : `^${registrationNumber}( .*)?$`);
   body.append("p_arg_names", "1498921620370179");
-  body.append("p_v08", chip ? "chip": "ident");
+  body.append("p_v08", chip ? "chip" : "ident");
   body.append("p_arg_names", "1501600458411400");
   body.append("p_t09", chip ? chip : `*${registrationNumber}*`);
   body.append("p_arg_names", "2733003807699059");
@@ -83,28 +83,41 @@ export const parseHorse = (rawParsedData) => {
   }
   const parseParent = (parent) => {
     if (!parent) {
-      return { name: "", registrationNumber: ""};
+      return { name: "", registrationNumber: "" };
     }
     const ps = parent.split("<br>");
-    return ps.reduce((map, line) => {
-      if (line.startsWith("<strong>Ident:</strong> ")) {
-        return { ...map, registrationNumber: line.substring(24) };
-      } else if (line.startsWith("<strong>Navn:</strong> ")) {
-        return { ...map, name: line.substring(23) };
-      } else {
-        return map;
-      }
-    }, { name: "", registrationNumber: ""});
+    return ps.reduce(
+      (map, line) => {
+        if (line.startsWith("<strong>Ident:</strong> ")) {
+          return { ...map, registrationNumber: line.substring(24) };
+        } else if (line.startsWith("<strong>Navn:</strong> ")) {
+          return { ...map, name: line.substring(23) };
+        } else {
+          return map;
+        }
+      },
+      { name: "", registrationNumber: "" }
+    );
   };
 
-  let additionalRegistrationNumbers = []
-  if ("Øvrige identiteter" in rawParsedData) {
-    additionalRegistrationNumbers = rawParsedData["Øvrige identiteter"].split("\n");
+  const parseChip = (marks) => {
+    if (!marks) {
+      return null;
+    }
+    return marks.split('<br>').reduce((lines, line) => line.startsWith("chip v.s. hals - ") ? line.substring(17): null, null);
   }
+
+  const parseAdditionalRegistrationNumbers = (otherIdentities) => {
+    if (!otherIdentities) {
+      return []
+    }
+    return otherIdentities.split("<br>");
+  }
+
   const result = {
-    breeder: "",
     name: rawParsedData.Navn,
     registrationNumber: rawParsedData.Ident,
+    chip: parseChip(rawParsedData.Mærker),
     // convert 26-05-2019 to 2019.05.26
     birthdate: rawParsedData.Fødselsdato.split("-").reverse().join("."),
     gender: ["vallak", "hingst"].includes(rawParsedData.Køn.toLowerCase())
@@ -112,8 +125,10 @@ export const parseHorse = (rawParsedData) => {
       : "hoppe",
     color: rawParsedData?.Farve,
     breeder: rawParsedData.Opdrætter ? rawParsedData.Opdrætter : "",
-    breedingAssociation: rawParsedData.Avlsforbund ? rawParsedData.Avlsforbund : "",
-    additionalRegistrationNumbers,
+    breedingAssociation: rawParsedData.Avlsforbund
+      ? rawParsedData.Avlsforbund
+      : "",
+    additionalRegistrationNumbers: parseAdditionalRegistrationNumbers(rawParsedData['Øvrige identiteter']),
     sire: parseParent(rawParsedData.Far),
     dam: parseParent(rawParsedData.Mor),
   };
