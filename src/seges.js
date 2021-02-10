@@ -21,13 +21,13 @@ export const getParentageByChip = async (chip, registrationNumber) => {
   body.append("p_arg_names", "5504418223409928");
   body.append("p_t05", "Søg hest");
   body.append("p_arg_names", "2435815727412919");
-  body.append("p_t06", chip ? "^$" : `^.*${registrationNumber}.*$`);
+  body.append("p_t06", chip ? "^$" : `^${registrationNumber}$`);
   body.append("p_arg_names", "2454408545080138");
-  body.append("p_t07", chip ? "^( .*)?$" : `^.*${registrationNumber}.*( .*)?$`);
+  body.append("p_t07", chip ? "^( .*)?$" : `^${registrationNumber}( .*)?$`);
   body.append("p_arg_names", "1498921620370179");
   body.append("p_v08", chip ? "chip": "ident");
   body.append("p_arg_names", "1501600458411400");
-  body.append("p_t09", chip ? chip : registrationNumber);
+  body.append("p_t09", chip ? chip : `*${registrationNumber}*`);
   body.append("p_arg_names", "2733003807699059");
   body.append("p_t10", "FIND_HEST_SOEGEKRITERIER");
   const requestOptions = {
