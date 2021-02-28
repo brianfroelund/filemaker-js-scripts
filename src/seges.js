@@ -118,8 +118,8 @@ export const parseHorse = (rawParsedData) => {
     name: rawParsedData.Navn,
     registrationNumber: rawParsedData.Ident,
     chip: parseChip(rawParsedData.Mærker),
-    // convert 26-05-2019 to 2019.05.26
-    birthdate: rawParsedData.Fødselsdato.split("-").reverse().join("."),
+    // convert 26-05-2019 to 26/05/2019
+    birthdate: rawParsedData.Fødselsdato.split("-").join("/"),
     gender: ["vallak", "hingst"].includes(rawParsedData.Køn.toLowerCase())
       ? "hingst"
       : "hoppe",
